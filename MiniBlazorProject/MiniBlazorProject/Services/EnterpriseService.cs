@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
 using MiniBlazorProject.Contracts;
 using MiniBlazorProject.Models;
-using MiniBlazorProject.Pages;
-using MiniBlazorProject.QueryObjects;
 using MiniBlazorProject.Utils;
 using Newtonsoft.Json;
 

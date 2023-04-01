@@ -16,4 +16,15 @@ public class RequestBodies
 
         return "{" + name + site + segment + active + "}";
     }
+
+    public static string UpsertSegmentRequestBody(Segment segment)
+    {
+        var id = "\"_id\": {\"$oid\": " + $"\"{segment.Id}\"" + "},";
+        var name = "\"Nome\":" + $"\"{segment.Name}\",";
+        var description = "\"Descrição\":" + $"\"{segment.Description}\"";
+
+        if (segment.Id != null) return "{" + id + name + description + "}";
+
+        return "{" + name + description + "}";
+    }
 }

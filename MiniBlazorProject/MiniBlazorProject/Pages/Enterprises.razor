@@ -6,6 +6,7 @@
 
 @inject HttpClient Http
 @inject IEnterpriseService EnterpriseService
+@inject ISegmentService SegmentService
 
 <PageTitle>Enterprises</PageTitle>
 <h1>Enterprises</h1>
@@ -52,7 +53,7 @@ else
 
 @code {
     private List<Enterprise> enterprises;
-    private int[] PageSizes = new int[] { 10, 25, 50 };
+    private List<Segment> segments;
     private int PageSize = 10;
     private int CurrentPage = 1;
     private string ErrorMessage;
@@ -80,6 +81,8 @@ else
         try
         {
             enterprises = await EnterpriseService.GetEnterprises(PageSize, CurrentPage);
+            //segments = await SegmentService.GetAllSegments(PageSize, CurrentPage);
+            var seg = await SegmentService.GetSegmentById("642876671965d0cee98d45b4");
         }
         catch (Exception e)
         {
