@@ -1,4 +1,4 @@
-﻿namespace MiniBlazorProject.Entities;
+﻿namespace MiniBlazorProject.Models;
 
 public class Enterprise
 {

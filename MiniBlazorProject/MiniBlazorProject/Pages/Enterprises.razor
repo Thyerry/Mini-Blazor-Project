@@ -1,9 +1,11 @@
 ﻿@page "/enterprises"
-@using MiniBlazorProject.Entities;
+@using MiniBlazorProject.Models;
+@using MiniBlazorProject.Services;
 @using MiniBlazorProject.Utils;
 @using Newtonsoft.Json;
 
 @inject HttpClient Http
+@inject IEnterpriseService EnterpriseService
 
 <PageTitle>Enterprises</PageTitle>
 <h1>Enterprises</h1>
@@ -16,7 +18,10 @@
     {
         <p>ErrorMessage</p>
     }
-    <p><em>Loading...</em></p>
+    else
+    {
+        <p><em>Loading...</em></p>
+    }
 }
 else
 {
@@ -42,7 +47,7 @@ else
 }
 
 @code {
-    private List<Enterprise> enterprises = new();
+    private List<Enterprise> enterprises;
     private int[] PageSizes = new int[] { 10, 25, 50 };
     private int PageSize = 10;
     private int CurrentPage = 1;
@@ -52,31 +57,12 @@ else
     {
         try
         {
-            string request = $"{Constants.GET_ENTERPRISES}&page={CurrentPage}&pageSize={PageSize}";
-            var response = await Http.GetAsync(request);
-            if (response.IsSuccessStatusCode)
-            {
-                var jsonResponse = await response.Content.ReadAsStringAsync();
-                dynamic? result = JsonConvert.DeserializeObject(jsonResponse);
-                var data = result.data;
-                foreach (var item in data)
-                {
-                    enterprises.Add(new()
-                    {
-                        Id = item.GetValue("_id").GetValue("$oid").Value,
-                        Name = item.GetValue("Nome").Value,
-                        Site = item.GetValue("Site").Value,
-                        Active = item.GetValue("Active").Value,
-                        SegmentId = item.GetValue("Segmento").GetValue("$oid").Value,
-                    });
-                }
-            }
+            enterprises = await EnterpriseService.GetEnterprises(PageSize, CurrentPage);
         }
         catch (Exception e)
         {
             ErrorMessage = e.Message;
             throw;
         }
-        
     }
 }
