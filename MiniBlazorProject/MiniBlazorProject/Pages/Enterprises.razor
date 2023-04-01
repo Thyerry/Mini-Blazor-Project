@@ -1,8 +1,8 @@
 ﻿@page "/enterprises"
 @using MiniBlazorProject.Models;
-@using MiniBlazorProject.Services;
 @using MiniBlazorProject.Utils;
 @using Newtonsoft.Json;
+@using MiniBlazorProject.Contracts;
 
 @inject HttpClient Http
 @inject IEnterpriseService EnterpriseService
@@ -25,6 +25,7 @@
 }
 else
 {
+    <NavLink class="nav-link" href="new-enterprise">+ Adicionar</NavLink>
     <table class="table">
         <thead>
             <tr>
