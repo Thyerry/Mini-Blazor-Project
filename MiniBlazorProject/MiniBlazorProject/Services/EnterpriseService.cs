@@ -1,5 +1,6 @@
 ﻿using MiniBlazorProject.Contracts;
 using MiniBlazorProject.Models;
+using MiniBlazorProject.Pages;
 using MiniBlazorProject.Utils;
 using Newtonsoft.Json;
 
@@ -77,7 +78,7 @@ namespace MiniBlazorProject.Services
 
         public async Task DeleteEnterprise(string enterpriseId)
         {
-            throw new NotImplementedException();
+            await _httpClient.DeleteAsync(EndPoints.BaseEnterpriseEndpoint(enterpriseId));
         }
     }
 }

@@ -47,6 +47,7 @@ else
     </table>
 }
 
+<input type="button" class="btn" @onclick="DeleteEnterprise" value="Delete Enterprise" />
 
 @code {
     private List<Enterprise> enterprises;
@@ -59,7 +60,10 @@ else
     {
         await Render();
     }
-
+    protected async Task DeleteEnterprise()
+    {
+        await EnterpriseService.DeleteEnterprise("6427aa69d90328e7c643cd99");
+    }
     protected async Task Render()
     {
         try
