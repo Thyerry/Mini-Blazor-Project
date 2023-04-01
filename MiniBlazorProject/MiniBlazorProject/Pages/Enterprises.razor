@@ -1,0 +1,82 @@
+﻿@page "/enterprises"
+@using MiniBlazorProject.Entities;
+@using MiniBlazorProject.Utils;
+@using Newtonsoft.Json;
+
+@inject HttpClient Http
+
+<PageTitle>Enterprises</PageTitle>
+<h1>Enterprises</h1>
+
+<p>This component demonstrates fetching data from the server.</p>
+
+@if (enterprises == null)
+{
+    @if (ErrorMessage != null)
+    {
+        <p>ErrorMessage</p>
+    }
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Site</th>
+                <th>Seguimento</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var enterprise in enterprises)
+            {
+                <tr>
+                    <td>@enterprise.Name</td>
+                    <td>@enterprise.Site</td>
+                    <td>@enterprise.SegmentId</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Enterprise> enterprises = new();
+    private int[] PageSizes = new int[] { 10, 25, 50 };
+    private int PageSize = 10;
+    private int CurrentPage = 1;
+    private string ErrorMessage = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            string request = $"{Constants.GET_ENTERPRISES}&page={CurrentPage}&pageSize={PageSize}";
+            var response = await Http.GetAsync(request);
+            if (response.IsSuccessStatusCode)
+            {
+                var jsonResponse = await response.Content.ReadAsStringAsync();
+                dynamic? result = JsonConvert.DeserializeObject(jsonResponse);
+                var data = result.data;
+                foreach (var item in data)
+                {
+                    enterprises.Add(new()
+                    {
+                        Id = item.GetValue("_id").GetValue("$oid").Value,
+                        Name = item.GetValue("Nome").Value,
+                        Site = item.GetValue("Site").Value,
+                        Active = item.GetValue("Active").Value,
+                        SegmentId = item.GetValue("Segmento").GetValue("$oid").Value,
+                    });
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            ErrorMessage = e.Message;
+            throw;
+        }
+        
+    }
+}
