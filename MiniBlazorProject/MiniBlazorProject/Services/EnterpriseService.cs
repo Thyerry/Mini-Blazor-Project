@@ -1,6 +1,8 @@
-﻿using MiniBlazorProject.Contracts;
+﻿using Microsoft.AspNetCore.Components;
+using MiniBlazorProject.Contracts;
 using MiniBlazorProject.Models;
 using MiniBlazorProject.Pages;
+using MiniBlazorProject.QueryObjects;
 using MiniBlazorProject.Utils;
 using Newtonsoft.Json;
 
@@ -65,9 +67,33 @@ namespace MiniBlazorProject.Services
             return enterprise;
         }
 
-        public async Task<List<Enterprise>> QueryEnterprises(string query)
+        public async Task<List<Enterprise>> QueryEnterprises(string query, int pageSize, int currentPage)
         {
-            throw new NotImplementedException();
+            var enterprises = new List<Enterprise>();
+            var request = EndPoints.QueryEnterprisesEndpoint(pageSize, currentPage);
+            var requestBody = Queries.MatchByNameQuery(query);
+            var response = await _httpClient.PostAsync(request, new StringContent(requestBody));
+            if (response.IsSuccessStatusCode)
+            {
+                var jsonResponse = await response.Content.ReadAsStringAsync();
+                dynamic? result = JsonConvert.DeserializeObject(jsonResponse);
+                var data = result.data;
+                if (data.Count == 0)
+                    return enterprises;
+
+                foreach (var item in data)
+                {
+                    enterprises.Add(new()
+                    {
+                        Id = item.GetValue("_id").GetValue("$oid").Value,
+                        Name = item.GetValue("Nome").Value,
+                        Site = item.GetValue("Site").Value,
+                        Active = item.GetValue("Active").Value,
+                        SegmentId = item.GetValue("Segmento").GetValue("$oid").Value,
+                    });
+                }
+            }
+            return enterprises;
         }
 
         public async Task UpdateEnterprise(Enterprise enterprise)

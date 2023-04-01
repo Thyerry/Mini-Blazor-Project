@@ -48,6 +48,7 @@ else
 }
 
 <input type="button" class="btn" @onclick="DeleteEnterprise" value="Delete Enterprise" />
+<input type="search" class="text-black" @oninput="OnChangeSearchBar" placeholder="Buscar Empresa" />
 
 @code {
     private List<Enterprise> enterprises;
@@ -63,6 +64,16 @@ else
     protected async Task DeleteEnterprise()
     {
         await EnterpriseService.DeleteEnterprise("6427aa69d90328e7c643cd99");
+    }
+
+    protected async Task OnChangeSearchBar(ChangeEventArgs ev)
+    {
+        if (string.IsNullOrEmpty(ev.Value.ToString()))
+            await Render();
+        else
+        {
+            enterprises = await EnterpriseService.QueryEnterprises(ev.Value.ToString(), PageSize, CurrentPage);
+        }
     }
     protected async Task Render()
     {
