@@ -4,12 +4,16 @@ namespace MiniBlazorProject.Utils;
 
 public class RequestBodies
 {
-    public static string CreateEnterpriseRequestBody(Enterprise enterprise)
+    public static string UpsertEnterpriseRequestBody(Enterprise enterprise)
     {
+        var id = "\"_id\": {\"$oid\": " + $"\"{enterprise.Id}\"" + "},";
         var name = "\"Nome\":" + $"\"{enterprise.Name}\",";
         var site = "\"Site\":" + $"\"{enterprise.Site}\",";
         var segment = "\"Segmento\": {\"$oid\": " + $"\"{enterprise.SegmentId}\"" + "},";
         var active = "\"Active\":" + $"\"{enterprise.Active}\"";
+
+        if(enterprise.Id != null) return "{" + id + name + site + segment + active + "}";
+
         return "{" + name + site + segment + active + "}";
     }
 }

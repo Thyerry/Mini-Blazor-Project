@@ -2,7 +2,6 @@
 using MiniBlazorProject.Models;
 using MiniBlazorProject.Utils;
 using Newtonsoft.Json;
-using System.Security;
 
 namespace MiniBlazorProject.Services
 {
@@ -16,7 +15,7 @@ namespace MiniBlazorProject.Services
         public async Task<List<Enterprise>> GetEnterprises(int pageSize, int currentPage)
         {
             var enterprises = new List<Enterprise>();
-            var request = EndPoints.GetSegmentsEndpoint(pageSize,currentPage);
+            var request = EndPoints.GetEnterprisesEndpoint(pageSize, currentPage);
             var response = await _httpClient.GetAsync(request);
             if (response.IsSuccessStatusCode)
             {
@@ -40,26 +39,43 @@ namespace MiniBlazorProject.Services
 
         public async Task CreateEnterprise(Enterprise enterprise)
         {
-            var requestBody = RequestBodies.CreateEnterpriseRequestBody(enterprise);
-            await _httpClient.PostAsync(EndPoints.BaseEnterpriseEndpoint(), new StringContent(requestBody));
+            var requestBody = RequestBodies.UpsertEnterpriseRequestBody(enterprise);
+            await _httpClient.PostAsync(EndPoints.CreateEnterpriseEndpoint(), new StringContent(requestBody));
         }
 
-        public Task<Enterprise> GetEnterpriseById(string EnterpriseId)
+        public async Task<Enterprise> GetEnterpriseById(string enterpriseId)
+        {
+            Enterprise enterprise = new Enterprise();
+            var request = EndPoints.BaseEnterpriseEndpoint(enterpriseId);
+            var response = await _httpClient.GetAsync(request);
+            if (response.IsSuccessStatusCode)
+            {
+                var jsonResponse = await response.Content.ReadAsStringAsync();
+                dynamic? result = JsonConvert.DeserializeObject(jsonResponse);
+                enterprise = new()
+                {
+                    Id = result.GetValue("_id").GetValue("$oid").Value,
+                    Name = result.GetValue("Nome").Value,
+                    Site = result.GetValue("Site").Value,
+                    Active = result.GetValue("Active").Value,
+                    SegmentId = result.GetValue("Segmento").GetValue("$oid").Value,
+                };
+            }
+            return enterprise;
+        }
+
+        public async Task<List<Enterprise>> QueryEnterprises(string query)
         {
             throw new NotImplementedException();
         }
 
-        public Task<List<Enterprise>> QueryEnterprises(string query)
+        public async Task UpdateEnterprise(Enterprise enterprise)
         {
-            throw new NotImplementedException();
+            var requestBody = RequestBodies.UpsertEnterpriseRequestBody(enterprise);
+            await _httpClient.PutAsync(EndPoints.BaseEnterpriseEndpoint(enterprise.Id), new StringContent(requestBody));
         }
 
-        public Task UpdateEnterprise(Enterprise Enterprise)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task DeleteEnterprise(string EnterpriseId)
+        public async Task DeleteEnterprise(string enterpriseId)
         {
             throw new NotImplementedException();
         }
