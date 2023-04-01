@@ -7,4 +7,5 @@ public class Enterprise
     public string? SegmentId { get; set; }
     public bool Active { get; set; }
     public string? Site { get; set; }
+    public Segment? Segment { get; set; }
 }

@@ -81,8 +81,6 @@ else
         try
         {
             enterprises = await EnterpriseService.GetEnterprises(PageSize, CurrentPage);
-            //segments = await SegmentService.GetAllSegments(PageSize, CurrentPage);
-            var seg = await SegmentService.GetSegmentById("642876671965d0cee98d45b4");
         }
         catch (Exception e)
         {

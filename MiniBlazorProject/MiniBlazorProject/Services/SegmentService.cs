@@ -34,15 +34,12 @@ namespace MiniBlazorProject.Services
             {
                 var jsonResponse = await response.Content.ReadAsStringAsync();
                 dynamic? result = JsonConvert.DeserializeObject(jsonResponse);
-                var data = result.data;
-                foreach (var item in data)
+                if (result.data.Count == 0)
+                    return segments;
+
+                foreach (var item in result.data)
                 {
-                    segments.Add(new()
-                    {
-                        Id = item.GetValue("_id").GetValue("$oid").Value,
-                        Name = item.GetValue("Nome").Value,
-                        Description = item.GetValue("Descrição").Value
-                    });
+                    segments.Add(MapSegment(item));
                 }
             }
             return segments;
@@ -61,12 +58,7 @@ namespace MiniBlazorProject.Services
                 if (result.Count == 0)
                     return segment;
 
-                segment = new()
-                {
-                    Id = result.GetValue("_id").GetValue("$oid").Value,
-                    Name = result.GetValue("Nome").Value,
-                    Description = result.GetValue("Descrição").Value
-                };
+                segment = MapSegment(result);
             }
             return segment;
         }
@@ -81,19 +73,13 @@ namespace MiniBlazorProject.Services
             {
                 var jsonResponse = await response.Content.ReadAsStringAsync();
                 dynamic? result = JsonConvert.DeserializeObject(jsonResponse);
-                var data = result.data;
 
-                if (data.Count == 0)
+                if (result.data.Count == 0)
                     return segments;
 
-                foreach (var item in data)
+                foreach (var item in result.data)
                 {
-                    segments.Add(new()
-                    {
-                        Id = item.GetValue("_id").GetValue("$oid").Value,
-                        Name = item.GetValue("Nome").Value,
-                        Description = item.GetValue("Descrição").Value,
-                    });
+                    segments.Add(MapSegment(item));
                 }
             }
             return segments;
@@ -103,6 +89,16 @@ namespace MiniBlazorProject.Services
         {
             var requestBody = RequestBodies.UpsertSegmentRequestBody(segment);
             await _httpClient.PutAsync(EndPoints.BaseSegmentEndpoint(segment.Id), new StringContent(requestBody));
+        }
+
+        private Segment MapSegment(dynamic? jsonObject)
+        {
+            return new()
+            {
+                Id = jsonObject.GetValue("_id").GetValue("$oid").Value,
+                Name = jsonObject.GetValue("Nome").Value,
+                Description = jsonObject.GetValue("Descrição").Value,
+            };
         }
     }
 }

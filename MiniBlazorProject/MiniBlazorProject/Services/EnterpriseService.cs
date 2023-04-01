@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components;
 using MiniBlazorProject.Contracts;
 using MiniBlazorProject.Models;
+using MiniBlazorProject.Pages;
 using MiniBlazorProject.Utils;
 using Newtonsoft.Json;
 
@@ -8,10 +9,12 @@ namespace MiniBlazorProject.Services
 {
     public class EnterpriseService : IEnterpriseService
     {
-        private HttpClient _httpClient;
-        public EnterpriseService(HttpClient httpClient)
+        private readonly HttpClient _httpClient;
+        private readonly ISegmentService _segmentService;
+        public EnterpriseService(HttpClient httpClient, ISegmentService segmentService)
         {
             _httpClient = httpClient;
+            _segmentService = segmentService;
         }
         public async Task<List<Enterprise>> GetEnterprises(int pageSize, int currentPage)
         {
@@ -25,14 +28,7 @@ namespace MiniBlazorProject.Services
                 var data = result.data;
                 foreach (var item in data)
                 {
-                    enterprises.Add(new()
-                    {
-                        Id = item.GetValue("_id").GetValue("$oid").Value,
-                        Name = item.GetValue("Nome").Value,
-                        Site = item.GetValue("Site").Value,
-                        Active = item.GetValue("Active").Value,
-                        SegmentId = item.GetValue("Segmento").GetValue("$oid").Value,
-                    });
+                    enterprises.Add(await MapEnterprise(item));
                 }
             }
             return enterprises;
@@ -53,14 +49,11 @@ namespace MiniBlazorProject.Services
             {
                 var jsonResponse = await response.Content.ReadAsStringAsync();
                 dynamic? result = JsonConvert.DeserializeObject(jsonResponse);
-                enterprise = new()
-                {
-                    Id = result.GetValue("_id").GetValue("$oid").Value,
-                    Name = result.GetValue("Nome").Value,
-                    Site = result.GetValue("Site").Value,
-                    Active = result.GetValue("Active").Value,
-                    SegmentId = result.GetValue("Segmento").GetValue("$oid").Value,
-                };
+
+                if (result.Count == 0)
+                    return enterprise;
+
+                enterprise = await MapEnterprise(result);
             }
             return enterprise;
         }
@@ -75,20 +68,13 @@ namespace MiniBlazorProject.Services
             {
                 var jsonResponse = await response.Content.ReadAsStringAsync();
                 dynamic? result = JsonConvert.DeserializeObject(jsonResponse);
-                var data = result.data;
-                if (data.Count == 0)
+
+                if (result.data.Count == 0)
                     return enterprises;
 
-                foreach (var item in data)
+                foreach (var item in result.data)
                 {
-                    enterprises.Add(new()
-                    {
-                        Id = item.GetValue("_id").GetValue("$oid").Value,
-                        Name = item.GetValue("Nome").Value,
-                        Site = item.GetValue("Site").Value,
-                        Active = item.GetValue("Active").Value,
-                        SegmentId = item.GetValue("Segmento").GetValue("$oid").Value,
-                    });
+                    enterprises.Add(await MapEnterprise(item));
                 }
             }
             return enterprises;
@@ -103,6 +89,20 @@ namespace MiniBlazorProject.Services
         public async Task DeleteEnterprise(string enterpriseId)
         {
             await _httpClient.DeleteAsync(EndPoints.BaseEnterpriseEndpoint(enterpriseId));
+        }
+
+        private async Task<Enterprise> MapEnterprise(dynamic? jsonObject)
+        {
+            var segmentID = jsonObject.GetValue("Segmento").GetValue("$oid").Value;
+            return new()
+            {
+                Id = jsonObject.GetValue("_id").GetValue("$oid").Value,
+                Name = jsonObject.GetValue("Nome").Value,
+                Site = jsonObject.GetValue("Site").Value,
+                Active = jsonObject.GetValue("Active").Value,
+                SegmentId = segmentID,
+                Segment = await _segmentService.GetSegmentById(segmentID),
+            };
         }
     }
 }
