@@ -46,14 +46,25 @@ else
     </table>
 }
 
+<input type="button" class="btn" @onclick="CreateEnterprise" value="Create New Enterprise" />
+
 @code {
     private List<Enterprise> enterprises;
     private int[] PageSizes = new int[] { 10, 25, 50 };
     private int PageSize = 10;
     private int CurrentPage = 1;
-    private string ErrorMessage = null;
+    private string ErrorMessage;
 
     protected override async Task OnInitializedAsync()
+    {
+        await Render();
+    }
+
+    protected async Task CreateEnterprise()
+    {
+        await EnterpriseService.CreateEnterprise(new() { Active = true, Name = "Fiat", SegmentId = "611edcebfd5915f2ae005dd5" });
+    }
+    protected async Task Render()
     {
         try
         {

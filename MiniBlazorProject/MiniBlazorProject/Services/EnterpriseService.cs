@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 namespace MiniBlazorProject.Services
 {
     public class EnterpriseService : IEnterpriseService
-    { 
+    {
         private HttpClient _httpClient;
         public EnterpriseService(HttpClient httpClient)
         {
@@ -14,7 +14,7 @@ namespace MiniBlazorProject.Services
         public async Task<List<Enterprise>> GetEnterprises(int pageSize, int currentPage)
         {
             var enterprises = new List<Enterprise>();
-            var request = $"{EndPoints.GET_ENTERPRISES}&page={currentPage}&pageSize={pageSize}";
+            var request = $"{EndPoints.ENTERPRISES}&page={currentPage}&pageSize={pageSize}";
             var response = await _httpClient.GetAsync(request);
             if (response.IsSuccessStatusCode)
             {
@@ -34,6 +34,12 @@ namespace MiniBlazorProject.Services
                 }
             }
             return enterprises;
+        }
+
+        public async Task CreateEnterprise(Enterprise enterprise)
+        {
+            var requestBody = RequestBodies.CreateEnterpriseRequestBody(enterprise);
+            await _httpClient.PostAsync($"{EndPoints.ENTERPRISES}", new StringContent(requestBody));
         }
     }
 }
