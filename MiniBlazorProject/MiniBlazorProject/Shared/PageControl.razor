@@ -8,11 +8,11 @@
         {
             if (i == currentPage)
             {
-                <button class="btn-primary btn fw-bold" @onclick="() => ShowPage(cp)">@i</button>
+                <button class="btn-primary btn fw-bold" @onclick="() => GotoPage(cp)">@i</button>
             }
             else
             {
-                <button class="btn-primary btn" @onclick="() => ShowPage(cp)">@i</button>
+                <button class="btn-primary btn" @onclick="() => GotoPage(cp)">@i</button>
             }
         }
     }
@@ -23,19 +23,32 @@
     [Parameter]
     public int pageSize { get; set; }
     [Parameter]
-    public int totalItems { get; set; }
+    public int totalPages { get; set; }
     [Parameter]
     public int currentPage { get; set; }
     [Parameter]
-    public EventCallback<int> PreviousPage { get; set; }
-    [Parameter]
-    public EventCallback<int> ShowPage { get; set; }
-    [Parameter]
-    public EventCallback<int> NextPage { get; set; }
-    private int totalPages = 1;
+    public EventCallback<int> ChangePage { get; set; }
 
-    protected override async Task OnInitializedAsync()
+    private void PreviousPage()
     {
-        totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+        if (currentPage > 1)
+        {
+            currentPage--;
+            ChangePage.InvokeAsync(currentPage);
+        }
+    }
+
+    private void GotoPage(int pageNumber)
+    {
+        ChangePage.InvokeAsync(pageNumber);
+    }
+
+    private void NextPage()
+    {
+        if (currentPage < totalPages)
+        {
+            currentPage++;
+            ChangePage.InvokeAsync(currentPage);
+        }
     }
 }

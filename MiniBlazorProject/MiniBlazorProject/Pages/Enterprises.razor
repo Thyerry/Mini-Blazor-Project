@@ -75,25 +75,12 @@ else
     </table>
 }
 
-<div>
-    <button class="btn-primary btn" @onclick="PreviousPage">⏪</button>
-    @for (int i = currentPage - 2; i <= currentPage + 2; i++)
-    {
-        int cp = i;
-        @if (i > 0 && i <= totalPages)
-        {
-            if (i == currentPage)
-            {
-                <button class="btn-primary btn fw-bold" @onclick="() => ShowPage(cp)">@i</button>
-            }
-            else
-            {
-                <button class="btn-primary btn" @onclick="() => ShowPage(cp)">@i</button>
-            }
-        }
-    }
-    <button class="btn-primary btn" @onclick="NextPage">⏩</button>
-</div>
+<PageControl 
+    currentPage="@currentPage" 
+    pageSize="@pageSize"
+    totalPages="@totalPages"
+    ChangePage="ChangePage"
+/>
 
 @code {
     private List<Enterprise> enterprises = new List<Enterprise>();
@@ -154,29 +141,18 @@ else
         await Render();
     }
 
-    protected async Task PreviousPage()
+    protected async Task ChangePage(int newPage)
     {
-        if (currentPage > 1)
-            currentPage--;
+        currentPage = newPage;
         await Render();
     }
 
-    protected async Task NextPage()
-    {
-        if (currentPage < totalPages)
-            currentPage++;
-        await Render();
-    }
     protected async Task UpdatePageValues()
     {
         totalEnterprises = await EnterpriseService.GetEnterprisesCount();
         totalPages = (int)Math.Ceiling((double)totalEnterprises / pageSize);
     }
-    protected async Task ShowPage(int page)
-    {
-        currentPage = page;
-        await Render();
-    }
+
     protected void LogPageInfo()
     {
         Console.WriteLine(pageSize);
