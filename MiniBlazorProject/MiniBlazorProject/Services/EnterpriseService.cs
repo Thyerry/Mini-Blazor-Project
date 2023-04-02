@@ -100,7 +100,7 @@ namespace MiniBlazorProject.Services
             if(response.IsSuccessStatusCode)
             {
                 var jsonResponse = await response.Content.ReadAsStringAsync();
-                var result = JsonConvert.DeserializeObject<EnterpriseCount>(jsonResponse);
+                var result = JsonConvert.DeserializeObject<CountResponse>(jsonResponse);
                 count = result.data.FirstOrDefault().count;
             }
             return count;

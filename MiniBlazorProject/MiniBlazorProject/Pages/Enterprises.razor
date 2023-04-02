@@ -1,7 +1,6 @@
 ﻿@page "/enterprises"
 @using MiniBlazorProject.Models;
 @using MiniBlazorProject.Utils;
-@using Newtonsoft.Json;
 @using MiniBlazorProject.Contracts;
 
 @inject HttpClient Http
@@ -11,7 +10,6 @@
 <PageTitle>Enterprises</PageTitle>
 <h1>Enterprises</h1>
 
-<p>This component demonstrates fetching data from the server.</p>
 <div>
     <a class="btn btn-success btn-sm py-1" href="view-enterprise">+ Add</a>
     <div class="py-1">
@@ -25,10 +23,7 @@
     </div>
 </div>
 
-<div>
-    <button @onclick="LogPageInfo">log values</button>
-    <input type="search" class="text-black" @oninput="OnChangeSearchBar" placeholder="Search Enterprise" />
-</div>
+<input type="search" class="text-black" @oninput="OnChangeSearchBar" placeholder="Search Enterprise" />
 
 @if (enterprises == null)
 {
@@ -46,7 +41,12 @@ else
 
     <table class="table">
         <thead>
-            <TableFields />
+            <tr>
+                <th>Name</th>
+                <th>Site</th>
+                <th>Segment</th>
+                <th>Actions</th>
+            </tr>
         </thead>
         <tbody>
             @foreach (var enterprise in enterprises)
@@ -59,7 +59,7 @@ else
                         <a class="btn-outline-success" href="/view-enterprise/@enterprise.Id">
                             <span class="oi oi-eye" aria-hidden="true"></span>
                         </a>
-                        <a class="btn-outline-danger" @onclick="(args) => DeleteEnterprise(args, enterprise.Id)">
+                        <a class="btn-outline-danger" @onclick="() => DeleteEnterprise(enterprise.Id)">
                             <span class="oi oi-trash" aria-hidden="true"></span>
                         </a>
                         <a class="btn-outline-primary" href="view-enterprise/@enterprise.Id">
@@ -70,23 +70,26 @@ else
             }
         </tbody>
         <tfoot>
-            <TableFields />
+            <tr>
+                <th>Name</th>
+                <th>Site</th>
+                <th>Segment</th>
+                <th>Actions</th>
+            </tr>
         </tfoot>
     </table>
 }
 
-<PageControl 
-    currentPage="@currentPage" 
-    pageSize="@pageSize"
-    totalPages="@totalPages"
-    ChangePage="ChangePage"
-/>
+<PageControl currentPage="@currentPage"
+             pageSize="@pageSize"
+             totalPages="@totalPages"
+             ChangePage="ChangePage" />
 
 @code {
     private List<Enterprise> enterprises = new List<Enterprise>();
     private List<Segment> segments = new();
-    private int pageSize = 10;
-    private int currentPage = 1;
+    private int pageSize = Constants.DEFAULT_PAGE_SIZE;
+    private int currentPage = Constants.DEFAULT_PAGE;
     private int totalPages = 1;
     private int totalEnterprises = 1;
     private string ErrorMessage;
@@ -97,7 +100,7 @@ else
         await Render();
     }
 
-    protected async Task DeleteEnterprise(MouseEventArgs ev, string enterpriseId)
+    protected async Task DeleteEnterprise(string enterpriseId)
     {
         await EnterpriseService.DeleteEnterprise(enterpriseId);
         enterprises = enterprises.Where(et => et.Id != enterpriseId).ToList();
@@ -111,6 +114,8 @@ else
         else
         {
             enterprises = await EnterpriseService.QueryEnterprises(searchText, pageSize, currentPage);
+            totalEnterprises = enterprises.Count;
+            await UpdatePageValues();
         }
     }
 

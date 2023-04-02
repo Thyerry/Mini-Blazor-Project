@@ -1,5 +1,6 @@
 ﻿using MiniBlazorProject.Contracts;
 using MiniBlazorProject.Models;
+using MiniBlazorProject.QueryObjects;
 using MiniBlazorProject.Utils;
 using Newtonsoft.Json;
 
@@ -63,7 +64,7 @@ namespace MiniBlazorProject.Services
             return segment;
         }
 
-        public async Task<List<Segment>> QuerySegment(string query, int pageSize, int currentPage)
+        public async Task<List<Segment>> QuerySegments(string query, int pageSize, int currentPage)
         {
             var segments = new List<Segment>();
             var request = EndPoints.QuerySegmentsEndpoint(pageSize, currentPage);
@@ -89,6 +90,20 @@ namespace MiniBlazorProject.Services
         {
             var requestBody = RequestBodies.UpsertSegmentRequestBody(segment);
             await _httpClient.PutAsync(EndPoints.BaseSegmentEndpoint(segment.Id), new StringContent(requestBody));
+        }
+
+        public async Task<int> GetSegmentCount()
+        {
+            int count = 0;
+            var requestBody = Queries.countQuery();
+            var response = await _httpClient.PostAsync(EndPoints.QuerySegmentsEndpoint(), new StringContent(requestBody));
+            if (response.IsSuccessStatusCode)
+            {
+                var jsonResponse = await response.Content.ReadAsStringAsync();
+                var result = JsonConvert.DeserializeObject<CountResponse>(jsonResponse);
+                count = result.data.FirstOrDefault().count;
+            }
+            return count;
         }
 
         private Segment MapSegment(dynamic? jsonObject)

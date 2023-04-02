@@ -2,7 +2,7 @@
 
 namespace MiniBlazorProject.QueryObjects
 {
-    public class EnterpriseCount
+    public class CountResponse
     {
         public Count[] data { get; set; }
         public int page { get; set; }

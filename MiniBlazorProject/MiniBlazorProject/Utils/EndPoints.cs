@@ -56,5 +56,9 @@ public static class EndPoints
     {
         return $"{SEGMENTS_ENDPOINT}/query?apiKey={API_KEY}&page={currentPage}&pageSize={pageSize}";
     }
+    public static string QuerySegmentsEndpoint()
+    {
+        return $"{SEGMENTS_ENDPOINT}/query?apiKey={API_KEY}";
+    }
     #endregion
 }
