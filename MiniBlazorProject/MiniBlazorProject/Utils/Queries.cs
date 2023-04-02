@@ -6,7 +6,7 @@ public class Queries
 {
     public static string countQuery()
     {
-        return $"[ {{ $count: \"Total de Registros\" }} ]";
+        return $"[ {{ $count: \"count\" }} ]";
     }
     public static string GroupAttributeQuery(List<string> propNames)
     {

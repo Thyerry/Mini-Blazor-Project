@@ -1,0 +1,41 @@
+﻿
+<div>
+    <button class="btn-primary btn" @onclick="PreviousPage">⏪</button>
+    @for (int i = currentPage - 2; i <= currentPage + 2; i++)
+    {
+        int cp = i;
+        @if (i > 0 && i <= totalPages)
+        {
+            if (i == currentPage)
+            {
+                <button class="btn-primary btn fw-bold" @onclick="() => ShowPage(cp)">@i</button>
+            }
+            else
+            {
+                <button class="btn-primary btn" @onclick="() => ShowPage(cp)">@i</button>
+            }
+        }
+    }
+    <button class="btn-primary btn" @onclick="NextPage">⏩</button>
+</div>
+
+@code {
+    [Parameter]
+    public int pageSize { get; set; }
+    [Parameter]
+    public int totalItems { get; set; }
+    [Parameter]
+    public int currentPage { get; set; }
+    [Parameter]
+    public EventCallback<int> PreviousPage { get; set; }
+    [Parameter]
+    public EventCallback<int> ShowPage { get; set; }
+    [Parameter]
+    public EventCallback<int> NextPage { get; set; }
+    private int totalPages = 1;
+
+    protected override async Task OnInitializedAsync()
+    {
+        totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+    }
+}

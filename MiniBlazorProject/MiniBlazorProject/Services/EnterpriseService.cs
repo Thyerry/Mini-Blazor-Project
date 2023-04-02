@@ -2,6 +2,7 @@
 using MiniBlazorProject.Contracts;
 using MiniBlazorProject.Models;
 using MiniBlazorProject.Pages;
+using MiniBlazorProject.QueryObjects;
 using MiniBlazorProject.Utils;
 using Newtonsoft.Json;
 
@@ -89,6 +90,20 @@ namespace MiniBlazorProject.Services
         public async Task DeleteEnterprise(string enterpriseId)
         {
             await _httpClient.DeleteAsync(EndPoints.BaseEnterpriseEndpoint(enterpriseId));
+        }
+
+        public async Task<int> GetEnterprisesCount()
+        {
+            int count = 0;
+            var requestBody = Queries.countQuery();
+            var response = await _httpClient.PostAsync(EndPoints.QueryEnterprisesEndpoint(), new StringContent(requestBody));
+            if(response.IsSuccessStatusCode)
+            {
+                var jsonResponse = await response.Content.ReadAsStringAsync();
+                var result = JsonConvert.DeserializeObject<EnterpriseCount>(jsonResponse);
+                count = result.data.FirstOrDefault().count;
+            }
+            return count;
         }
 
         private async Task<Enterprise> MapEnterprise(dynamic? jsonObject)

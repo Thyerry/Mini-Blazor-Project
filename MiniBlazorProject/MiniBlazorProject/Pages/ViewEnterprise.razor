@@ -1,4 +1,6 @@
 ﻿@page "/view-enterprise/{enterpriseId}"
+@page "/view-enterprise/"
+
 @using MiniBlazorProject.Contracts;
 @using MiniBlazorProject.Models;
 @using MiniBlazorProject.Utils;
@@ -6,9 +8,9 @@
 @inject IEnterpriseService EnterpriseService;
 @inject ISegmentService SegmentService;
 
-<h3>@enterpriseTitleName</h3>
+<h3>@title</h3>
 <div>
-    <EditForm Model="@enterprise" OnSubmit="@HandleSubmit" class="form-control-plaintext flex-column">
+    <EditForm Model="@enterprise" OnSubmit="@HandleSubmit" href="/enterprises" class="form-control-plaintext flex-column">
         <div style="flex: auto">
             Name:
             <div>
@@ -45,7 +47,17 @@
         </div>
 
         <div class="align-content-center" >
-            <button class="btn-primary" type="submit">Submit</button>
+            <button class="btn-primary" type="submit">
+                @if (string.IsNullOrEmpty(enterpriseId))
+                {
+                    <b>Create</b>
+                }
+                else
+                {
+                    <b>Update</b>
+                }
+            </button>
+            <a class="btn btn-primaty-outline btn-sm" href="enterprises">Cancel</a>
         </div>
     </EditForm>
 </div>
@@ -56,15 +68,22 @@
     [Parameter]
     public string? enterpriseId { get; set; }
 
-    private string enterpriseTitleName = "";
+    private string title = "";
     private bool nameValidationError = false;
-    private Enterprise enterprise;
+    private Enterprise enterprise = new();
     private List<Segment> segments;
 
     protected override async Task OnInitializedAsync()
     {
-        enterprise = await EnterpriseService.GetEnterpriseById(enterpriseId);
-        enterpriseTitleName = enterprise.Name;
+        if(!string.IsNullOrEmpty(enterpriseId))
+        {
+            enterprise = await EnterpriseService.GetEnterpriseById(enterpriseId);
+            title = enterprise.Name;
+        }
+        else
+        {
+            title = "Create new enterprise";
+        }
         segments = await SegmentService.GetAllSegments(Constants.PAGE_SIZES.Last(), 1);
     }
 
@@ -78,9 +97,11 @@
         try
         {
             if (string.IsNullOrEmpty(enterprise.SegmentId))
-            {
                 enterprise.SegmentId = null;
-            }
+            if (string.IsNullOrEmpty(enterpriseId))
+                await EnterpriseService.CreateEnterprise(enterprise);
+            else
+                await EnterpriseService.UpdateEnterprise(enterprise);
         }
         catch (Exception)
         {
