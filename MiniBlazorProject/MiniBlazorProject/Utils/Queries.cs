@@ -8,10 +8,10 @@ public class Queries
     {
         return $"[ {{ $count: \"Total de Registros\" }} ]";
     }
-    public static string GroupEnterpriseQuery(EnterpriseQO enterpriseQO)
+    public static string GroupAttributeQuery(List<string> propNames)
     {
         var insideQuery = string.Empty;
-        foreach (var prop in enterpriseQO.propsToGroup)
+        foreach (var prop in propNames)
         {
             insideQuery += $"{prop}: \"${prop}\", ";
         }

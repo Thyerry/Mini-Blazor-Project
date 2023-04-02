@@ -93,15 +93,23 @@ namespace MiniBlazorProject.Services
 
         private async Task<Enterprise> MapEnterprise(dynamic? jsonObject)
         {
-            var segmentID = jsonObject.GetValue("Segmento").GetValue("$oid").Value;
+            string segmentId = string.Empty;
+            try
+            {
+                segmentId = jsonObject.GetValue("Segmento").GetValue("$oid").Value;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
             return new()
             {
                 Id = jsonObject.GetValue("_id").GetValue("$oid").Value,
                 Name = jsonObject.GetValue("Nome").Value,
                 Site = jsonObject.GetValue("Site").Value,
                 Active = jsonObject.GetValue("Active").Value,
-                SegmentId = segmentID,
-                Segment = await _segmentService.GetSegmentById(segmentID),
+                SegmentId = segmentId,
             };
         }
     }

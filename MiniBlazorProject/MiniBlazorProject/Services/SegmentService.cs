@@ -56,7 +56,7 @@ namespace MiniBlazorProject.Services
                 dynamic? result = JsonConvert.DeserializeObject(jsonResponse);
 
                 if (result.Count == 0)
-                    return segment;
+                    return null;
 
                 segment = MapSegment(result);
             }
@@ -93,11 +93,14 @@ namespace MiniBlazorProject.Services
 
         private Segment MapSegment(dynamic? jsonObject)
         {
+            var id = jsonObject.GetValue("_id").GetValue("$oid").Value;
+            var name = jsonObject.GetValue("Nome").Value;
+            var description = jsonObject.GetValue("Descrição").Value;
             return new()
             {
-                Id = jsonObject.GetValue("_id").GetValue("$oid").Value,
-                Name = jsonObject.GetValue("Nome").Value,
-                Description = jsonObject.GetValue("Descrição").Value,
+                Id = id,
+                Name = name,
+                Description = description,
             };
         }
     }

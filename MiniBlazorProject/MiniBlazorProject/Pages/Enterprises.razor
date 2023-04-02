@@ -17,7 +17,7 @@
 {
     @if (ErrorMessage != null)
     {
-        <p>ErrorMessage</p>
+        <p>@ErrorMessage</p>
     }
     else
     {
@@ -29,11 +29,7 @@ else
     <NavLink class="nav-link" href="new-enterprise">+ Adicionar</NavLink>
     <table class="table">
         <thead>
-            <tr>
-                <th>Nome</th>
-                <th>Site</th>
-                <th>Seguimento</th>
-            </tr>
+            <TableFields />
         </thead>
         <tbody>
             @foreach (var enterprise in enterprises)
@@ -41,46 +37,70 @@ else
                 <tr>
                     <td>@enterprise.Name</td>
                     <td>@enterprise.Site</td>
-                    <td>@enterprise.SegmentId</td>
+                    <td>@GetSegmentName(enterprise.SegmentId)</td>
+                    <td>
+                        <a class="btn-outline-success" href="/view-enterprise/@enterprise.Id">
+                            <span class="oi oi-eye" aria-hidden="true"></span>
+                        </a>
+                        <a class="btn-outline-danger" @onclick="(args) => DeleteEnterprise(args, enterprise.Id)">
+                            <span class="oi oi-trash" aria-hidden="true"></span>
+                        </a>
+                        <a class="btn-outline-primary" href="view-enterprise/@enterprise.Id">
+                            <span class="oi oi-pencil" aria-hidden="true"></span>
+                        </a>
+                    </td>
                 </tr>
             }
         </tbody>
+        <tfoot>
+            <TableFields />
+        </tfoot>
     </table>
 }
 
-<input type="button" class="btn" @onclick="DeleteEnterprise" value="Delete Enterprise" />
 <input type="search" class="text-black" @oninput="OnChangeSearchBar" placeholder="Buscar Empresa" />
 
 @code {
     private List<Enterprise> enterprises;
-    private List<Segment> segments;
+    private List<Segment> segments = new();
     private int PageSize = 10;
     private int CurrentPage = 1;
     private string ErrorMessage;
 
+    private string sd = $"<span class=\"oi oi-eye\" aria-hidden=\"true\"></span>";
     protected override async Task OnInitializedAsync()
     {
         await Render();
     }
-    protected async Task DeleteEnterprise()
+    protected async Task DeleteEnterprise(MouseEventArgs ev, string enterpriseId)
     {
-        await EnterpriseService.DeleteEnterprise("6427aa69d90328e7c643cd99");
+        await EnterpriseService.DeleteEnterprise(enterpriseId);
+        enterprises = enterprises.Where(et => et.Id != enterpriseId).ToList();
     }
 
     protected async Task OnChangeSearchBar(ChangeEventArgs ev)
     {
-        if (string.IsNullOrEmpty(ev.Value.ToString()))
+        var searchText = ev.Value.ToString();
+        if (string.IsNullOrEmpty(searchText))
             await Render();
         else
         {
-            enterprises = await EnterpriseService.QueryEnterprises(ev.Value.ToString(), PageSize, CurrentPage);
+            enterprises = await EnterpriseService.QueryEnterprises(searchText, PageSize, CurrentPage);
         }
+    }
+
+    protected string GetSegmentName(string segmentId)
+    {
+        var result = segments.FirstOrDefault(s => s.Id == segmentId);
+        return result != null ? result.Name : "";
     }
     protected async Task Render()
     {
         try
         {
             enterprises = await EnterpriseService.GetEnterprises(PageSize, CurrentPage);
+            if (!segments.Any())
+                segments = await SegmentService.GetAllSegments(Constants.PAGE_SIZES.Max(), 1);
         }
         catch (Exception e)
         {

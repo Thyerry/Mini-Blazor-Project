@@ -1,0 +1,90 @@
+﻿@page "/view-enterprise/{enterpriseId}"
+@using MiniBlazorProject.Contracts;
+@using MiniBlazorProject.Models;
+@using MiniBlazorProject.Utils;
+
+@inject IEnterpriseService EnterpriseService;
+@inject ISegmentService SegmentService;
+
+<h3>@enterpriseTitleName</h3>
+<div>
+    <EditForm Model="@enterprise" OnSubmit="@HandleSubmit" class="form-control-plaintext flex-column">
+        <div style="flex: auto">
+            Name:
+            <div>
+                <InputText id="name" title="Name" @bind-Value="enterprise.Name" @oninput="CheckIfIsValid"/>
+                @if (@nameValidationError)
+                {
+                    <span class="alert">Name is not valid!</span>
+                }
+            </div>
+        </div>
+        <div style="flex-direction: row">
+            Site:
+            <div>
+                <InputText id="site" @bind-Value="enterprise.Site" />
+            </div>
+        </div>
+        <div>
+            Active:
+            <InputCheckbox id="active" @bind-Value="enterprise.Active" />
+        </div>
+
+        <div>
+            Segment:
+            <div>
+                <InputSelect @bind-Value="@enterprise.SegmentId">
+                    <option value="">Select segment...</option>
+                    @foreach (var segment in segments)
+                    {
+                        <option value="@segment.Id">@segment.Name</option>
+                    }
+                </InputSelect>
+            </div>
+
+        </div>
+
+        <div class="align-content-center" >
+            <button class="btn-primary" type="submit">Submit</button>
+        </div>
+    </EditForm>
+</div>
+
+
+
+@code {
+    [Parameter]
+    public string? enterpriseId { get; set; }
+
+    private string enterpriseTitleName = "";
+    private bool nameValidationError = false;
+    private Enterprise enterprise;
+    private List<Segment> segments;
+
+    protected override async Task OnInitializedAsync()
+    {
+        enterprise = await EnterpriseService.GetEnterpriseById(enterpriseId);
+        enterpriseTitleName = enterprise.Name;
+        segments = await SegmentService.GetAllSegments(Constants.PAGE_SIZES.Last(), 1);
+    }
+
+    protected async Task CheckIfIsValid(ChangeEventArgs ev)
+    {
+        nameValidationError = string.IsNullOrEmpty(ev.Value.ToString());            
+    }
+
+    protected async Task HandleSubmit()
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(enterprise.SegmentId))
+            {
+                enterprise.SegmentId = null;
+            }
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
+}
