@@ -23,7 +23,11 @@ namespace MiniBlazorProject.Services
 
         public async Task DeleteSegment(string segmentId)
         {
-            await _httpClient.DeleteAsync(EndPoints.BaseSegmentEndpoint(segmentId));
+            var response = await _httpClient.DeleteAsync(EndPoints.BaseSegmentEndpoint(segmentId));
+            if(!response.IsSuccessStatusCode)
+            {
+               throw new HttpRequestException(await response.Content.ReadAsStringAsync()); 
+            }
         }
 
         public async Task<List<Segment>> GetAllSegments(int pageSize, int currentPage)

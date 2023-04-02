@@ -1,0 +1,84 @@
+﻿@page "/view-segment/{segmentId}"
+@page "/view-segment/"
+@using MiniBlazorProject.Contracts;
+@using MiniBlazorProject.Models;
+
+@inject ISegmentService SegmentService;
+
+<h3>@title</h3>
+<div>
+    <EditForm Model="@segment" OnSubmit="@HandleSubmit" class="form-control-plaintext flex-column">
+        <div style="flex: auto">
+            Name:
+            <div>
+                <InputText id="name" title="Name" @bind-Value="segment.Name" @oninput="CheckIfIsValid" />
+                @if (@nameValidationError)
+                {
+                    <span class="alert">Name is not valid!</span>
+                }
+            </div>
+        </div>
+        <div style="flex-direction: row">
+            Description:
+            <div>
+                <InputText id="site" @bind-Value="segment.Description" />
+            </div>
+        </div>
+
+        <div class="align-content-center">
+            <button class="btn-primary" type="submit">
+                @if (string.IsNullOrEmpty(segmentId))
+                {
+                    <b>Create</b>
+                }
+                else
+                {
+                    <b>Update</b>
+                }
+            </button>
+            <a class="btn btn-primaty-outline btn-sm" href="segments">Cancel</a>
+        </div>
+    </EditForm>
+</div>
+
+
+@code {
+    [Parameter]
+    public string segmentId { get; set; }
+
+    private string title = "";
+    private bool nameValidationError = false;
+    private Segment segment = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!string.IsNullOrEmpty(segmentId))
+        {
+            segment = await SegmentService.GetSegmentById(segmentId);
+            title = segment.Name;
+        }
+        else
+        {
+            title = "Create new Segment";
+        }
+    }
+    protected async Task CheckIfIsValid(ChangeEventArgs ev)
+    {
+        nameValidationError = string.IsNullOrEmpty(ev.Value.ToString());
+    }
+
+    protected async Task HandleSubmit()
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(segmentId))
+                await SegmentService.CreateSegment(segment);
+            else
+                await SegmentService.UpdateSegment(segment);
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
+}
