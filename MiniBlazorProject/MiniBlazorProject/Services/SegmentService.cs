@@ -98,9 +98,13 @@ namespace MiniBlazorProject.Services
 
         public async Task<int> GetSegmentCount()
         {
+            return await GetSegmentCount(Queries.CountAll());
+        }
+
+        public async Task<int> GetSegmentCount(string query)
+        {
             int count = 0;
-            var requestBody = Queries.CountAll();
-            var response = await _httpClient.PostAsync(EndPoints.QuerySegmentsEndpoint(), new StringContent(requestBody));
+            var response = await _httpClient.PostAsync(EndPoints.QuerySegmentsEndpoint(), new StringContent(query));
             if (response.IsSuccessStatusCode)
             {
                 var jsonResponse = await response.Content.ReadAsStringAsync();

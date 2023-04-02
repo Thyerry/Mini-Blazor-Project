@@ -6,6 +6,8 @@
 @inject ISegmentService SegmentService;
 
 <PageTitle>Segments</PageTitle>
+<h1>Segments</h1>
+
 <div>
     <a class="btn btn-success btn-sm py-1" href="view-segment">+ Add</a>
     <div class="py-1">
@@ -76,7 +78,8 @@ else
     private int currentPage = Constants.DEFAULT_PAGE;
     private int totalPages = 1;
     private int totalSegments = 1;
-    private string errorMessage = "";
+    private string errorMessage = string.Empty;
+    private string searchText = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
@@ -86,12 +89,30 @@ else
 
     protected async Task Render()
     {
-        segments = await SegmentService.GetAllSegments(pageSize, currentPage);
+        try
+        {
+            if(!string.IsNullOrEmpty(searchText))
+            {
+                totalSegments = await SegmentService.GetSegmentCount(Queries.MatchByNameCount(searchText));
+                segments = await SegmentService.QuerySegments(searchText, pageSize, currentPage);
+            }
+            else
+            {
+                totalSegments = await SegmentService.GetSegmentCount();
+                segments = await SegmentService.GetAllSegments(pageSize, currentPage);
+            }
+
+            await UpdatePageValues();
+        }
+        catch (Exception e)
+        {
+            errorMessage = e.Message;
+            throw;
+        }
     }
 
     protected async Task UpdatePageValues()
     {
-        totalSegments = await SegmentService.GetSegmentCount();
         totalPages = (int)Math.Ceiling((double)totalSegments / pageSize);
     }
 
@@ -104,13 +125,8 @@ else
 
     protected async Task OnChangeSearchBar(ChangeEventArgs ev)
     {
-        var searchText = ev.Value.ToString();
-        if (string.IsNullOrEmpty(searchText))
-            await Render();
-        else
-        {
-            segments = await SegmentService.QuerySegments(searchText, pageSize, currentPage);
-        }
+        searchText = ev.Value.ToString();
+        await Render();
     }
     protected async Task DeleteSegment(string segmentId)
     {

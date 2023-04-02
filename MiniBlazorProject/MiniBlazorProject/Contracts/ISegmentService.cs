@@ -11,5 +11,6 @@ namespace MiniBlazorProject.Contracts
         Task UpdateSegment(Segment segment);
         Task DeleteSegment(string segmentId);
         Task<int> GetSegmentCount();
+        Task<int> GetSegmentCount(string query);
     }
 }
