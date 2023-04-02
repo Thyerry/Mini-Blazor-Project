@@ -4,9 +4,9 @@ namespace MiniBlazorProject.Utils;
 
 public class Queries
 {
-    public static string countQuery()
+    public static string CountAll()
     {
-        return $"[ {{ $count: \"count\" }} ]";
+        return "[ { $count: \"count\" } ]";
     }
     public static string GroupAttributeQuery(List<string> propNames)
     {
@@ -24,5 +24,12 @@ public class Queries
     public static string MatchBySegment(string segmentId)
     {
         return $"[ {{ $match : {{ \"Segmento\" :{{ \"$oid\": \"{segmentId}\" }} }} }} ]";
+    }
+
+    public static string MatchByNameCount(string name)
+    {
+        var match = $"{{ $match : {{ \"Nome\" :{{ $regex:\"^(?i){name}[a-zA-Z]\" }} }} }}";
+        var count = "{ $count: \"count\" }";
+        return $"[{match}, {count}]";
     }
 }

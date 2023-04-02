@@ -7,6 +7,7 @@ public interface IEnterpriseService
 {
     Task<List<Enterprise>> GetEnterprises(int pageSize, int page);
     Task<int> GetEnterprisesCount();
+    Task<int> GetEnterprisesCount(string query);
     Task<Enterprise> GetEnterpriseById(string enterpriseId);
     Task<List<Enterprise>> QueryEnterprises(string query, int pageSize, int page);
     Task CreateEnterprise(Enterprise Enterprise);

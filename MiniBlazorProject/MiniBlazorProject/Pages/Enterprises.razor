@@ -93,11 +93,12 @@ else
     private int totalPages = 1;
     private int totalEnterprises = 1;
     private string ErrorMessage;
+    private string searchText = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
-        await UpdatePageValues();
         await Render();
+        await UpdatePageValues();
     }
 
     protected async Task DeleteEnterprise(string enterpriseId)
@@ -108,15 +109,8 @@ else
 
     protected async Task OnChangeSearchBar(ChangeEventArgs ev)
     {
-        var searchText = ev.Value.ToString();
-        if (string.IsNullOrEmpty(searchText))
-            await Render();
-        else
-        {
-            enterprises = await EnterpriseService.QueryEnterprises(searchText, pageSize, currentPage);
-            totalEnterprises = enterprises.Count;
-            await UpdatePageValues();
-        }
+        searchText = ev.Value.ToString();
+        await Render();
     }
 
     protected string GetSegmentName(string segmentId)
@@ -128,9 +122,22 @@ else
     {
         try
         {
-            enterprises = await EnterpriseService.GetEnterprises(pageSize, currentPage);
+            if (!string.IsNullOrEmpty(searchText))
+            {
+                enterprises = await EnterpriseService.QueryEnterprises(searchText, pageSize, currentPage);
+                totalEnterprises = await EnterpriseService.GetEnterprisesCount(Queries.MatchByNameCount(searchText));
+            }
+            else
+            {
+                enterprises = await EnterpriseService.GetEnterprises(pageSize, currentPage);
+                totalEnterprises = await EnterpriseService.GetEnterprisesCount();
+            }
+
             if (!segments.Any())
                 segments = await SegmentService.GetAllSegments(Constants.PAGE_SIZES.Max(), 1);
+
+            await UpdatePageValues();
+
         }
         catch (Exception e)
         {
@@ -142,8 +149,8 @@ else
     protected async Task PageSizeChange(ChangeEventArgs args)
     {
         pageSize = int.Parse(args.Value.ToString());
-        await UpdatePageValues();
         await Render();
+        await UpdatePageValues();
     }
 
     protected async Task ChangePage(int newPage)
@@ -154,13 +161,6 @@ else
 
     protected async Task UpdatePageValues()
     {
-        totalEnterprises = await EnterpriseService.GetEnterprisesCount();
         totalPages = (int)Math.Ceiling((double)totalEnterprises / pageSize);
-    }
-
-    protected void LogPageInfo()
-    {
-        Console.WriteLine(pageSize);
-        Console.WriteLine(currentPage);
     }
 }

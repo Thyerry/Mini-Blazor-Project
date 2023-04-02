@@ -99,7 +99,7 @@ namespace MiniBlazorProject.Services
         public async Task<int> GetSegmentCount()
         {
             int count = 0;
-            var requestBody = Queries.countQuery();
+            var requestBody = Queries.CountAll();
             var response = await _httpClient.PostAsync(EndPoints.QuerySegmentsEndpoint(), new StringContent(requestBody));
             if (response.IsSuccessStatusCode)
             {

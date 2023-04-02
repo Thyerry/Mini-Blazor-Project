@@ -94,9 +94,13 @@ namespace MiniBlazorProject.Services
 
         public async Task<int> GetEnterprisesCount()
         {
+            return await GetEnterprisesCount(Queries.CountAll());
+        }
+
+        public async Task<int> GetEnterprisesCount(string query)
+        {
             int count = 0;
-            var requestBody = Queries.countQuery();
-            var response = await _httpClient.PostAsync(EndPoints.QueryEnterprisesEndpoint(), new StringContent(requestBody));
+            var response = await _httpClient.PostAsync(EndPoints.QueryEnterprisesEndpoint(), new StringContent(query));
             if(response.IsSuccessStatusCode)
             {
                 var jsonResponse = await response.Content.ReadAsStringAsync();
